@@ -96,7 +96,7 @@ use Carp;
 use File::Spec;
 
 my $Use4th; # Use 4th level (Unicode 6.2.0 or before)
-my $DEFAULT_LOCALE_VERSION = '1.01'; # update DUCET (Unicode 6.3.0)
+my $DEFAULT_LOCALE_VERSION = '1.08'; # should be same as $VERSION of Collate.pm
 
 BEGIN {
     unless ("A" eq pack('U', 0x41)) {
