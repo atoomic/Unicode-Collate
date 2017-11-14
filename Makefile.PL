@@ -4,10 +4,10 @@ use ExtUtils::MakeMaker;
 my $clean = {};
 
 if (-f "Collate.xs") {
-    print STDERR "Making header files for XS...\n";
-
-    do 'mkheader' or die $@ || "mkheader: $!";
-
+    print "Making header files for XS...\n";
+    # Should $mkh be File::Spec->catfile(File::Spec->curdir(), 'mkheader') ?
+    my $mkh = './mkheader';
+    do $mkh or die $@ || "mkheader: $!";
     $clean = { FILES => 'ucatbl.h' };
 }
 

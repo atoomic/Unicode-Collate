@@ -1,5 +1,76 @@
 Revision history for Perl module Unicode::Collate.
 
+1.23  Mon Nov 13 19:10:28 2017
+    - Now UCA_Version 36 (for Unicode 10.0.0) is supported.
+      * But the default UCA_Version is still 34.
+    - added nushu.t in t.
+
+1.22  Sat Nov 11 10:53:35 2017
+    - internal: someone suggests using 'exists' for checking the truth of
+      $collator->{mapping}{$variable} and $collator->{maxlength}{$variable},
+      where $variable may stand for codepoints whose mapping is not defined;
+      though such a problem was not reproduced on my environment.
+
+1.21  Sat Nov  4 10:49:19 2017
+    - mklocale: [rt.cpan.org #121664] . removed from @INC (take 2)
+    - DUCET is updated (for Unicode 9.0.0) as Collate/allkeys.txt.
+    - The default UCA_Version is 34.
+    - added tangut.t in t.
+    - Locale/*.pl and CJK/Korean.pm are updated.
+
+1.20  Fri Nov  3 11:50:21 2017
+    - XS: [rt.cpan.org #121664] . removed from @INC
+    - U::C::Locale newly supports locales: dsb, lkt.
+
+1.19  Sat Dec  3 09:32:31 2016
+    - U::C::Locale newly supports locales: he, vo.
+    - locales updated to CLDR 24: az, haw.
+    - locale updated to CLDR 26: et.
+
+1.18  Sat Nov  5 21:14:35 2016
+    - U::C::Locale newly supports locale: de_AT_phonebook.
+    - locales updated to CLDR 23: as, ca.
+    - removed locale fr (French) other than Canadian according to CLDR 1.9.0.
+
+1.17  Wed Oct 26 21:46:12 2016
+    - DUCET is updated (for Unicode 8.0.0) as Collate/allkeys.txt.
+    - The default UCA_Version is 32.
+    - U+9FCD..U+9FD5 and U+2B820..U+2CEA1 are new CJK unified ideographs.
+    - Cyrillic contractions except SHORT I are removed from DUCET.
+      * modified locales: be, bs_Cyrl, kk, mk, sr, uk.
+      * removed locales: bg, ru.
+    - Locale/*.pl and CJK/Korean.pm are updated.
+
+1.16  Mon Oct 24 21:31:12 2016
+    - modified tests for the Cyrillic script before updating DUCET:
+      loc_be.t, loc_kk.t, loc_mncy.t, loc_ru.t, loc_uk.t.
+
+1.15  Sat Oct 22 08:36:07 2016
+    - U::C::Locale newly supports locale: ug_Cyrl.
+      cf. [rt.cpan.org #117512]
+    - added loc_mncy.t, loc_ugcy.t in t.
+    - modified tests for the Cyrillic script: loc_be.t, loc_bg.t, loc_bscy.t,
+      loc_kk.t, loc_mk.t, loc_ru.t, loc_sr.t, loc_uk.t.
+
+1.14  Sat Jul 11 13:20:03 2015
+    - [rt.cpan.org #105621]
+      mklocale fails as it creates Locale directory without executable bit.
+
+1.13  Sat Jul 11 12:13:50 2015
+    - something to remove 'use Unicode::Collate' from CJK/Korean.pm
+      cf. [rt.cpan.org #105791]
+
+1.12  Mon Mar 16 20:21:15 2015
+    - XS: [rt.cpan.org #102663] IRIX 6.5 failures with Unicode::Collate
+      (porting: avoid non-zero values in the initializer of an array)
+
+1.11  Tue Feb 17 21:23:03 2015
+    - XS: [rt.cpan.org #102024] remove extranous const casting
+
+1.10  Thu Jan 15 21:37:58 2015
+    - XS: const &c [rt.cpan.org #101170] [PATCH]
+    - Makefile.PL: [rt.cpan.org #101500] [PATCH]
+
 1.09  Thu Dec 18 21:39:18 2014
     - XS: a workaround for perl 5.6.x to handle noncharacters U+FFFF etc.
       is abandoned. Perl 5.8.0 or later is recommended for handling these
@@ -7,8 +78,6 @@ Revision history for Perl module Unicode::Collate.
 
 1.08  Sat Dec  6 20:12:55 2014
     - DUCET is updated (for Unicode 7.0.0) as Collate/allkeys.txt.
-    ! Please notice that allkeys.txt will be overwritten if you have had
-      other allkeys.txt already.
     - The default UCA_Version is 30.
     - *.pl and *.pm are updated so that they have same the version number.
 
@@ -16,8 +85,8 @@ Revision history for Perl module Unicode::Collate.
     - XS: for the world without utf8n_to_uvuni().
 
 1.06  Tue May 27 21:11:09 2014
-    - 0.67's improved discontiguous contractions is invalidated by default
-      and is supported as a parameter 'long_contraction.'
+    - 0.67's improved discontiguous contractions are invalidated by default
+      and are supported as a parameter 'long_contraction.'
 
 1.05  Sat May 24 16:30:42 2014
     - XS: avoid unused expression 1; for no-op.
@@ -41,8 +110,6 @@ Revision history for Perl module Unicode::Collate.
 
 1.01  Sat Nov  2 19:00:38 2013
     - DUCET is updated (for Unicode 6.3.0) as Collate/allkeys.txt.
-    ! Please notice that allkeys.txt will be overwritten if you have had
-      other allkeys.txt already.
     - The default UCA_Version is 28.
     - Locale/*.pl (except fr.pl) and CJK/Korean.pm are updated.
     - modified tests: loc_es.t, loc_estr.t, rewrite.t, version.t in t.
@@ -83,8 +150,8 @@ Revision history for Perl module Unicode::Collate.
 
 0.95  Sat Dec  8 15:11:09 2012
     - U::C::Locale newly supports locales: bs_Cyrl, ee.
-    - updated to CLDR 21: uk.
-    - updated to CLDR 22: th, to.
+    - locale updated to CLDR 21: uk.
+    - locales updated to CLDR 22: th, to.
     - added loc_bscy.t, loc_ee.t in t.
     - modified tests: loc_th.t, loc_to.t, loc_uk.t in t.
 
@@ -97,8 +164,6 @@ Revision history for Perl module Unicode::Collate.
 
 0.93  Sun Nov 18 18:13:42 2012
     - DUCET is updated (for Unicode 6.2.0) as Collate/allkeys.txt.
-    ! Please notice that allkeys.txt will be overwritten if you have had
-      other allkeys.txt already.
     - The default UCA_Version is 26.
     - Locale/*.pl (except fr.pl) and CJK/Korean.pm are updated.
     - modified tests: loc_es.t, loc_estr.t, version.t in t.
@@ -126,8 +191,6 @@ Revision history for Perl module Unicode::Collate.
 
 0.88  Mon Mar  5 21:56:13 2012
     - DUCET is updated (for Unicode 6.1.0) as Collate/allkeys.txt.
-    ! Please notice that allkeys.txt will be overwritten if you have had
-      other allkeys.txt already.
     - U+9FCC is a new CJK unified ideograph.
     - The default UCA_Version is 24.
     - Locale/*.pl (except fr.pl) and CJK/Korean.pm are updated.
@@ -203,17 +266,13 @@ Revision history for Perl module Unicode::Collate.
     - added iglevel2.t and rewrite.t in t.
 
 0.74  Mon Mar 21 19:07:38 2011
-    - removed sw (Swahili) collation according to CLDR 1.9.
+    - removed locale sw (Swahili) according to CLDR 1.9.0.
         (removed files: Collate/Locale/sw.pl and data/sw.txt)
     - shifted primary weights of letters > Z for some languages.
         (affected locales: da, fi, fo, kl, nb, nn, sv)
 
 0.73  Sun Mar  6 13:24:22 2011
     - DUCET is updated (for Unicode 6.0.0) as Collate/allkeys.txt.
-    ! However no maint perl has supported Unicode 6.0.0 yet;
-      wait for 5.14, or try developing 5.13.7 or later.
-    ! Please notice that allkeys.txt will be overwritten if you have had
-      other allkeys.txt already.
     - The default UCA_Version is 22.
     - Locale/*.pl (except fr.pl and ko.pl) and CJK/Korean.pm are updated.
     - test: compare allkeys.txt's version with Base_Unicode_Version
@@ -242,10 +301,10 @@ Revision history for Perl module Unicode::Collate.
 
 0.67  Sun Nov 14 11:38:59 2010
     - supported UCA_Version 22 for Unicode 6.0.0.
-      * 2B740..2B81D are new CJK unified ideographs.
+      * U+2B740..U+2B81D are new CJK unified ideographs.
       * noncharacters (e.g. U+FFFF) should be overridable, not be ignored.
-    ! DUCET is NOT updated, as no maint perl supports Unicode 6.0.0.
-      Thus the default UCA_Version is still 20.
+      * DUCET is NOT updated, as no maint perl supports Unicode 6.0.0.
+        Thus the default UCA_Version is still 20.
     - added t/nonchar.t.
     - improved discontiguous contractions of 3 or more characters.
       (e.g. 0FB2 0F71 0F80 and 0FB3 0F71 0F80)
@@ -258,7 +317,7 @@ Revision history for Perl module Unicode::Collate.
     - 12 compat. ideographs (e.g. U+FA0E) are treated as unified ideographs.
      (though DUCET also does it, now Unicode::Collate does it without DUCET.)
     - added t/compatui.t.
-    ! Ideographs Ext.B (U+20000..U+2A6D6) can be overridden with UCA_Version 8.
+    * Ideographs Ext.B (U+20000..U+2A6D6) can be overridden with UCA_Version 8.
       This is a long-standing behavior from Unicode::Collate 0.11 to 0.63.
       A wrong fix at 0.64 should be abandoned.
 
@@ -279,7 +338,7 @@ Revision history for Perl module Unicode::Collate.
       to return an integer or undef value.
     - fix: Ideographs Ext.B (U+20000..U+2A6D6) are assigned in Unicode 3.1,
            then 'overrideCJK' should not override them with UCA_Version 8.
-      !! sorry, this fix is based on a wrong idea. reverted at 0.66. !!
+      * sorry, this fix is based on a wrong idea. reverted at 0.66.
     - separated t/overcjk0.t and t/overcjk1.t from t/override.t.
 
 0.63  Sun Oct 10 22:13:21 2010
@@ -335,40 +394,36 @@ Revision history for Perl module Unicode::Collate.
 0.56  Sun Aug  8 20:24:03 2010
     - Unicode::Collate::Locale newly supports locales: eo, nb, ro, sv.
     - added loc_eo.t, loc_es.t, loc_estr.t, loc_nb.t, loc_ro.t, loc_sv.t in t.
-    ! renamed t/locale_{xy}.t to t/loc_{xy}.t (for safer 8.3 names)
-     (loc_cs.t, loc_fr.t, loc_nn.t, loc_pl.t, loc_test.t)
+      * renamed t/locale_{xy}.t to t/loc_{xy}.t (for safer 8.3 names)
+       (loc_cs.t, loc_fr.t, loc_nn.t, loc_pl.t, loc_test.t)
 
 0.55  Sun Aug  1 21:21:23 2010
     - incorporated Unicode::Collate::Locale with some changes. see:
   http://www.xray.mpe.mpg.de/mailing-lists/perl-unicode/2004-03/msg00030.html
     - supported locales: cs, es, es__traditional, fr, nn, pl.
-    ! added t/locale*.t that uses DUCET.
+    * added t/locale*.t that uses DUCET.
      (locale_cs.t, locale_fr.t, locale_nn.t, locale_pl.t, locale_test.t)
     - data/*.txt and mklocale for preparation of Locale/*.pl from DUCET.
 
 0.54  Sun Jul 25 21:37:04 2010
     - Now UCA Revision 20 (based on Unicode 5.2.0).
     - DUCET is also updated (for Unicode 5.2.0) as Collate/allkeys.txt,
-      which *is required* to test this module.
-    ! Please notice that allkeys.txt will be overwritten if you have had
-      other allkeys.txt already.
+      which is required to test this module.
     - U+9FC4..U+9FCB and U+2A700..U+2B734 are new CJK unified ideographs.
     - Many hangul jamo are assigned (affecting hangul_terminator).
 
-    ! Now XSUB will be built by default. (XSUB needs a C compiler.)
+    * Now XSUB will be built by default. (XSUB needs a C compiler.)
       To build pure perl, run disableXS before Makefile.PL.
-    ! DUCET will be compiled when XS is used. Explicit saying
+    * DUCET will be compiled when XS is used. Explicit saying
       <table => 'allkeys.txt'> (or using another table) will prevent
       this module from using the compiled DUCET.
 
-    ! added t/default.t that uses DUCET.
+    * added t/default.t that uses DUCET.
 
 0.53  Sun Feb 14 20:46:27 2010
     - Now UCA Revision 18 (based on Unicode 5.1.0).
     - DUCET is also updated (for Unicode 5.1.0) as Collate/allkeys.txt,
       which is not required to test this module.
-    ! Please notice that allkeys.txt will be overwritten if you have had
-      other allkeys.txt already.
     - U+9FBC..U+9FC3 are new CJK unified ideographs.
 
 0.52  Thu Oct 13 21:51:09 2005
@@ -378,8 +433,6 @@ Revision history for Perl module Unicode::Collate.
 0.51  Sun May 29 20:21:19 2005
     - Added the latest DUCET (for Unicode 4.1.0) as Collate/allkeys.txt,
       which is not required to test this module.
-    ! Please notice that allkeys.txt will be overwritten if you have had
-      other allkeys.txt already.
     - Added INSTALL section in POD.
 
 0.50  Sun May  8 20:26:39 2005

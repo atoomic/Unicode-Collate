@@ -4,7 +4,7 @@
 # used by Unicode::Collate::Locale.
 #
 # Usage:
-#    <do 'mklocale'> in perl, or <perl mklocale> in command line
+#    <do './mklocale'> in perl, or <perl mklocale> in command line
 #
 # Input files:
 #    data/*.txt
@@ -22,7 +22,7 @@
 # == Examples of the Rules for data/*.txt ==
 #
 # 00F1;n+1 ===> primary weight of 00F1 is greater than that of n by 1.
-#    Among literals, only [A-Za-z] can be the base.
+#    Among literals, only [A-Za-z'"] can be the base.
 #    +1 for primary weight (greater by 1),
 #    -1 for primary weight (less by 1),
 #    ++1 and --1 for secondary weight,
@@ -96,7 +96,7 @@ use Carp;
 use File::Spec;
 
 my $Use4th; # Use 4th level (Unicode 6.2.0 or before)
-my $DEFAULT_LOCALE_VERSION = '1.09'; # should be same as $VERSION of Collate.pm
+my $DEFAULT_LOCALE_VERSION = '1.23'; # should be same as $VERSION of Collate.pm
 
 BEGIN {
     unless ("A" eq pack('U', 0x41)) {
@@ -466,19 +466,24 @@ for my $k (sort keys %Equiv) {
     my $KO_foot = ''; # after /^\); # for DUCET/
     while (my $line = <$fh>) {
 	chomp $line;
-	$line .= "\n"; # guarantee the last LF at the file end.
-	$KO_head .= $line if 1 .. ($line =~ /^my %jamo2prim/);
-	$KO_foot .= $line if ($line =~ /^\); # for DUCET/) .. 1; # eof($fh)
 
 	# check jamo that a syllable in __DATA__ comprises.
 	if (($line =~ /^__DATA__/) .. ($line =~ /^__END__/)) {
-	    next if $line !~ /^[A-D]/; # skip non-Hangul
-	    my @u = _getHexArray($line);
-	    croak "unexpected $line" if @u != 1;
-	    my $uv = $u[0];
-	    croak "unexpected $line" unless SBase <= $uv && $uv <= SFinal;
-	    $KO_jamo{$_} = 1 for decHangul($uv);
+	    if ($line =~ /^[A-D]/) { # Hangul syllable
+		$line =~ s/:.*//;
+		my @u = _getHexArray($line);
+		croak "unexpected $line" if @u != 1;
+		my $uv = $u[0];
+		croak "unexpected $line" unless SBase <= $uv && $uv <= SFinal;
+		my @dec = decHangul($uv);
+		$KO_jamo{$_} = 1 for @dec;
+		$line .= ':'.join '-', map sprintf('%04X', $_), @dec;
+	    }
 	}
+
+	$line .= "\n"; # guarantee the last LF at the file end.
+	$KO_head .= $line if 1 .. ($line =~ /^my %jamo2prim/);
+	$KO_foot .= $line if ($line =~ /^\); # for DUCET/) .. 1; # eof($fh)
     }
     close $fh;
 
@@ -491,7 +496,7 @@ for my $k (sort keys %Equiv) {
 	print $pm ' ' if ($count % 4) == 0;
 	++$count;
 	print $pm '   ';
-	print $pm sprintf '0x%04X, 0x%04X,', $_, $JamoWt1{$_};
+	print $pm sprintf q!'%04X', 0x%04X,!, $_, $JamoWt1{$_};
 	print $pm "\n" if ($count % 4) == 0;
     }
     print $pm "\n" if $count % 4 != 0;
@@ -511,7 +516,7 @@ my @txts = grep /^[a-zA-Z]/, readdir DIR;
 closedir DIR;
 
 my $target = 'Locale';
-mkdir $target, 0666;
+mkdir $target;
 for my $txt (@txts) {
     my %locale_keys;
     my $txtfile = File::Spec->catfile($source, $txt);
@@ -519,8 +524,8 @@ for my $txt (@txts) {
        $pl =~ s/\.txt\z/.pl/ or croak "$PACKAGE: $source/$txt is not .txt";
     my $plfile = File::Spec->catfile($target, $pl);
 
-    open my $fh,  $txtfile  or croak "$PACKAGE: $source/$txt is not found";
-    open my $ph, ">$plfile" or croak "$PACKAGE: $target/$pl can't be made";
+    open my $fh,  $txtfile  or croak "$PACKAGE: $source/$txt is not found: $!";
+    open my $ph, ">$plfile" or croak "$PACKAGE: $target/$pl can't be made: $!";
     binmode $ph;
 
     my $ptxt  = '';
@@ -541,7 +546,7 @@ for my $txt (@txts) {
 	    s/\s*\z/.pm/;
 	    my $f = File::Spec->catfile($CUR_DIR, split /::/, $_);
 	    $f = 'Korean.pm' if /::Korean\.pm/; # using the newer one
-	    require $f;
+	    require "./$f"; # File::Spec->catfile($CUR_DIR, $f) seems not work.
 	    next;
 	}
 	if (/^(alternate)\s+(\S+)/) {
@@ -726,7 +731,7 @@ sub parse_rule {
     my $rule = shift;
     my $lockeys = shift;
     my $result = '';
-    my $simple_decomp = 1; # rules containing only [A-Za-z] or <XXXX>
+    my $simple_decomp = 1; # rules containing only [A-Za-z'"] or <XXXX>
 
     for (my $prerule = $rule; $rule ne ''; $prerule = $rule) {
 	$rule =~ s/^ +//;
@@ -761,7 +766,7 @@ sub parse_rule {
 	}
 
 	my $key;
-	if ($rule =~ s/^(<[0-9A-Za-z'{ }]+>|[A-Za-z])//) {
+	if ($rule =~ s/^(<[0-9A-Za-z'{ }]+>|[A-Za-z'"])//) {
 	    my $e = $1;
 	    my $c = $e =~ tr/<>//d ? parse_element($e) : getunicode($e);
 	    croak "<$c> is too short" if 4 > length $c;
